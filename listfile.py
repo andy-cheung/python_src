@@ -1,14 +1,9 @@
 import os,sys
-from hashlib import md5
+import md5
 
-def calMD5(str):
-	m = md5()
-	m.update(str)
-	return m.hexdigest() 
 def calMD5ForFile(file):
-	m = md5()
 	a_file = open(file, 'rb')
-	m.update(a_file.read())
+	m = md5.new(a_file.read())
 	a_file.close()
 	return m.hexdigest()
 

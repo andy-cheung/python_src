@@ -6,11 +6,6 @@ import time
 import urllib
 import commands
 
-dbhost = "127.0.0.1"
-dbpwaswd = "123456"
-dbport = 3306
-dbname = "actor"
-
 def startSrv():
 	print("startSrv....")
 	try:
@@ -35,30 +30,11 @@ def startSrv():
 	sys.stdout.flush()
 	sys.stderr.flush()
 
-def process(sid, cmdid, cmd, para1, para2):
-	print("recv:" + cmd)
-	output = ""
-	if cmd == "update":
-		status, output = commands.getstatusoutput("update.sh")
-		#upate:download and unzip
-		print(output)
+def loadConfig():
+	dbhost = "127.0.0.1"
+	dbport = 3306
+	dbname = "actor"
 
-	#send result to web server
-	f = urllib.urlopen("http://localhost/servercmd_callback.jsp?cmdid=%d&ret=%s&sid=%d" % (cmdid, output, sid))
-	s = f.read()
-	print("web result:", s)
-	f.close()
-
-if __name__ == '__main__':
-	dir = os.getcwd()
-	startSrv()
-	print "========================="
-	print("startSrv success!")
-	print "========================="
-	
-	os.chdir(dir)
-	
-	# load config
 	f = open("DBServer.txt", "r")
 	list = f.readlines() 
 	find = False
@@ -91,6 +67,33 @@ if __name__ == '__main__':
 				else:
 					print "error!!" + line
 					exit(-1)
+	return dbhost, dbport, dbname
+
+def process(sid, cmdid, cmd, para1, para2):
+	print("recv:" + cmd)
+	output = ""
+	if cmd == "update":
+		status, output = commands.getstatusoutput("update.sh")
+		#upate:download and unzip
+		print(output)
+
+	#send result to web server
+	f = urllib.urlopen("http://localhost/servercmd_callback.jsp?cmdid=%d&ret=%s&sid=%d" % (cmdid, output, sid))
+	s = f.read()
+	print("web result:", s)
+	f.close()
+
+if __name__ == '__main__':
+	dir = os.getcwd()
+	startSrv()
+	print "========================="
+	print("startSrv success!")
+	print "========================="
+	
+	os.chdir(dir)
+	
+	# load config
+	dbhost, dbport, dbname = loadConfig()
 
 	#connect to mysql
 	conn = MySQLdb.Connect(host=dbhost, user='root', passwd="hoolai12", port=string.atoi(dbport), db=dbname)
