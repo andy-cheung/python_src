@@ -1,4 +1,4 @@
-# import MySQLdb
+import MySQLdb
 import string
 import os, re
 import sys
@@ -31,17 +31,27 @@ def startSrv():
 	sys.stderr.flush()
 
 def loadConfig():
-	dbhost = "127.0.0.1"
-	dbport = 3306
-	dbname = "actor"
+	dbhost = ""
+	dbport ="" 
+	dbname = ""
+	serverindex = ""
 
-	f = open("DBServer.txt", "r")
+	f = open("GameWorld.txt", "r")
 	list = f.readlines() 
 	find = False
 	for line in list:
 		if line.find("SQL") >= 0:
 			find = True
 			continue
+		if line.find("ServerIndex") >= 0:
+			m = re.search(r"\d+", line)
+			if m:
+				serverindex = m.group(0)
+				print serverindex
+			else:
+				print "error!!" + line
+				exit(-1)
+
 		if find:
 			if line.find("Host") >= 0:
 				m = re.search(r"\"[^\"]*\"", line)
@@ -67,18 +77,28 @@ def loadConfig():
 				else:
 					print "error!!" + line
 					exit(-1)
-	return dbhost, dbport, dbname
+			
+			if dbname != "" and dbport != "" and dbhost != "" and serverindex != "":
+				break
+	return dbhost, dbport, dbname,serverindex
 
 def process(sid, cmdid, cmd, para1, para2):
 	print("recv:" + cmd)
 	output = ""
 	if cmd == "update":
-		status, output = commands.getstatusoutput("update.sh")
+		status, output = commands.getstatusoutput("./update.sh")
 		#upate:download and unzip
 		print(output)
 
 	#send result to web server
-	f = urllib.urlopen("http://localhost/servercmd_callback.jsp?cmdid=%d&ret=%s&sid=%d" % (cmdid, output, sid))
+	outputlist = output.split("\n")
+	llen = len(outputlist)
+	if llen > 0:
+		output = outputlist[llen - 1]
+	output = urllib.quote(output)
+	url = "http://localhost/servercmd_callback.jsp?cmdid=%d&ret=%s&sid=%d" % (cmdid, output, sid)
+	print(url)
+	f = urllib.urlopen(url)
 	s = f.read()
 	print("web result:", s)
 	f.close()
@@ -93,7 +113,7 @@ if __name__ == '__main__':
 	os.chdir(dir)
 	
 	# load config
-	dbhost, dbport, dbname = loadConfig()
+	dbhost, dbport, dbname,serverindex = loadConfig()
 
 	#connect to mysql
 	conn = MySQLdb.Connect(host=dbhost, user='root', passwd="hoolai12", port=string.atoi(dbport), db=dbname)
@@ -102,7 +122,7 @@ if __name__ == '__main__':
 	cur = conn.cursor()
 	while True:
 		# load cmd from db per 5 sec
-		cur.execute("select id,serverid,cmdid, cmd, param1, param2 from servercmd limit 1")
+		cur.execute("select id,serverid,cmdid, cmd, param1, param2 from servercmd where serverid=%s limit 1" % serverindex)
 		if cur.rowcount >= 1:
 			row = cur.fetchone()
 			id = row[0]
@@ -115,3 +135,4 @@ if __name__ == '__main__':
 				exit(-1)	#delete error,exit system
 
 		time.sleep(5)
+
