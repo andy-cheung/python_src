@@ -1,6 +1,7 @@
 import os
 import sys
 import socket
+import thread
 
 def startSrv():
     print("startSrv....")
@@ -25,7 +26,19 @@ def startSrv():
 
     sys.stdout.flush()
     sys.stderr.flush()
-    
+
+def clientThread(connection, address):
+    try:  
+        connection.settimeout(5)  
+        buf = connection.recv(1024)  
+        if buf != '<policy-file-request/>':  
+            print 'buf error:', buf
+        connection.send('<?xml version="1.0"?><cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>')  
+
+    except Exception, e:
+        print e  
+    connection.close() 
+
 if __name__ == '__main__':
     startSrv()
     try:
@@ -39,14 +52,6 @@ if __name__ == '__main__':
     while True:
         try:
             connection,address = sock.accept()  
-            try:  
-                connection.settimeout(1)  
-                buf = connection.recv(1024)  
-                if buf == '<policy-file-request/>':  
-                    connection.send('<?xml version="1.0"?><cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>')  
-            except Exception, e:
-                print e  
-                
-            connection.close() 
+            thread.start_new(clientThread, (connection, address))
         except Exception, e:
             print e
