@@ -1,5 +1,4 @@
 import os
-import contextlib
 import sys
 import socket
 import thread
@@ -30,15 +29,14 @@ def startSrv():
 
 def clientThread(connection, address):
     try:  
-        with contextlib.closing(connection):
-            connection.settimeout(5)  
-            buf = connection.recv(1024)  
-            if buf != '<policy-file-request/>\0':  
-                print 'request error:', buf
-            connection.sendall('<?xml version="1.0"?><cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>')  
+        connection.settimeout(5)  
+        buf = connection.recv(1024)  
+        if buf != '<policy-file-request/>\0':  
+            print 'request error:', buf
+        connection.sendall('<?xml version="1.0"?><cross-domain-policy><allow-access-from domain="*" to-ports="*"/></cross-domain-policy>')  
+        connection.close()    
     except Exception, e:
         print e  
-
 if __name__ == '__main__':
     startSrv()
     try:
