@@ -13,7 +13,7 @@ def startSrv():
 		if pid > 0:
 			sys.exit(0)
 	except Exception, e:
-		sys.stderr.write("fork 1 fail")
+		sys.stderr.write("fork #1 failed: (%d) %s\n" %(e.errno, e.strerror))
 		sys.exit(1)
 	os.chdir("/")
 	os.setsid()
