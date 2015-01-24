@@ -13,7 +13,7 @@ def startSrv():
 		if pid > 0:
 			sys.exit(0)
 	except Exception, e:
-		sys.stderr.write("fork #1 failed: (%d) %s\n" %(e.errno, e.strerror))
+		sys.stderr.write("fork 1 fail")
 		sys.exit(1)
 	os.chdir("/")
 	os.setsid()
@@ -89,22 +89,41 @@ def process(sid, cmdid, cmd, para1, para2):
 		status, output = commands.getstatusoutput("./update.sh")
 		#upate:download and unzip
 		print(output)
+	elif cmd == "stop":
+		status, output = commands.getstatusoutput("./stop.sh "+para1)
+		#upate:download and unzip
+		print(output)
+	elif cmd == "start":
+		status, output = commands.getstatusoutput("./start.sh " +para1 +" " +para2)
+		#upate:download and unzip
+		print(output)
+	elif cmd == "gfqr":
+		status, output = commands.getstatusoutput("./gfqr.sh " +para1)
+		print(output)
+	elif cmd == "qfqr":
+		status, output = commands.getstatusoutput("./qfqr.sh " +para1)
+		print(output)
 
 	#send result to web server
+	
 	outputlist = output.split("\n")
 	llen = len(outputlist)
 	if llen > 0:
 		output = outputlist[llen - 1]
 	output = urllib.quote(output)
-	url = "http://localhost/servercmd_callback.jsp?cmdid=%d&ret=%s&sid=%d" % (cmdid, output, sid)
+	url = "http://10.204.190.127/sacallback.jsp?cmdid=%d&ret=%s&sid=%d" % (cmdid, output, sid)
 	print(url)
 	f = urllib.urlopen(url)
 	s = f.read()
+	# if s == None or s == "":
+	#	print("jsp invalid")
+	#	exit(-1)
+		
 	print("web result:", s)
 	f.close()
 
 if __name__ == '__main__':
-	dir = os.getcwd()
+	dir = os.path.split(os.path.realpath(__file__))[0]
 	startSrv()
 	print "========================="
 	print("startSrv success!")

@@ -1,0 +1,76 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		A119DB4017F166170057006E /* execcmd.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = execcmd.py; path = ../execcmd.py; sourceTree = "<group>"; };
+		A119DB4117F166170057006E /* checkfile.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = checkfile.py; path = ../checkfile.py; sourceTree = "<group>"; };
+		A119DB4217F166170057006E /* listfile.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; name = listfile.py; path = ../listfile.py; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		A119DB3717F165E70057006E = {
+			isa = PBXGroup;
+			children = (
+				A119DB4017F166170057006E /* execcmd.py */,
+				A119DB4117F166170057006E /* checkfile.py */,
+				A119DB4217F166170057006E /* listfile.py */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		A119DB3917F165E70057006E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0450;
+			};
+			buildConfigurationList = A119DB3C17F165E70057006E /* Build configuration list for PBXProject "python_t" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = A119DB3717F165E70057006E;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		A119DB3E17F165E70057006E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		A119DB3F17F165E70057006E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A119DB3C17F165E70057006E /* Build configuration list for PBXProject "python_t" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A119DB3E17F165E70057006E /* Debug */,
+				A119DB3F17F165E70057006E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A119DB3917F165E70057006E /* Project object */;
+}
