@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import socket, select
 import Queue
+import os
+import sys
+import string
 
 message_queues = {}
 sidlist = {}
@@ -30,7 +33,13 @@ def startSrv():
 	sys.stdout.flush()
 	sys.stderr.flush()
 
-def sendDataToFD(fd, msg):
+def clear(fd):
+	adminlist.pop(fd)
+	for k,v in sidlist.items():
+		if v == fd:
+			sidlist.pop(k)	
+
+def sendDataToFD(fd, msg): 
 	message_queues[fd].put(msg)
 	#修改读取到消息的连接到等待写事件集合
 	epoll.modify(fd, select.EPOLLOUT)
@@ -44,7 +53,7 @@ def sendAll(msg):
 		sendData(i, msg)
 
 def process(fd, msg):
-	if msg == "exit" || msg == "quit":
+	if msg == "exit" or msg == "quit":
 		if adminlist[fd]:
 			exit(0)
 
@@ -66,6 +75,9 @@ def process(fd, msg):
 		elif regname.isalnum():
 			#sid
 			sidlist[regname] = fd
+		print("%s reg!%d" % (regname, fd))
+		sendDataToFD(fd, "ok")
+
 	elif cmd == "cmd":
 		#cmd#all[sid]#adminname#msgno#****
 		if (len(cmdlist) < 5):
@@ -83,8 +95,8 @@ def process(fd, msg):
 		adminname = cmdlist[2]
 		for k, v in adminlist.items():
 			if v == adminname:
-				sendDataToFD(k)
-				
+				sendDataToFD(k, msg)
+
 if __name__ == '__main__':
 	
 	startSrv()
@@ -122,7 +134,7 @@ if __name__ == '__main__':
 					#注册新连接fd到待读事件集合
 					epoll.register(connection.fileno(), select.EPOLLIN)
 					fd_to_socket[connection.fileno()] = connection
-					message_queues[fd]	= Queue.Queue()
+					message_queues[connection.fileno()]	= Queue.Queue()
 				#否则为客户端发送的数据
 				else:
 					closefd = False
@@ -141,6 +153,7 @@ if __name__ == '__main__':
 						epoll.unregister(fd)
 						fd_to_socket[fd].close()
 						del fd_to_socket[fd]
+						clear(fd)
 			#可写事件
 			elif event & select.EPOLLOUT:		
 				try:
