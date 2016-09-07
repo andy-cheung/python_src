@@ -28,7 +28,7 @@ while True:
 	for fd, event in events:
 		socket = fd_to_socket[fd]
 		#可读事件
-		elif event & select.EPOLLIN:
+		if event & select.EPOLLIN:
 			#如果活动socket为服务器所监听，有新连接
 			if socket == serversocket:
 				connection, address = serversocket.accept()
