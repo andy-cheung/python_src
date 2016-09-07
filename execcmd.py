@@ -36,7 +36,7 @@ def loadConfig():
 	dbname = ""
 	serverindex = ""
 
-	f = open("GameWorld.txt", "r")
+	f = open("./gameworld/GameWorld.txt", "r")
 	list = f.readlines() 
 	find = False
 	for line in list:
@@ -82,27 +82,37 @@ def loadConfig():
 				break
 	return dbhost, dbport, dbname,serverindex
 
-def process(sid, cmdid, cmd, para1, para2):
+def process(sid, cmdid, cmd, para1, para2, dir):
 	print("recv:" + cmd)
 	output = ""
 	if cmd == "update":
-		status, output = commands.getstatusoutput("./update.sh")
+		status, output = commands.getstatusoutput(dir+"/update.sh")
 		#upate:download and unzip
 		print(output)
 	elif cmd == "stop":
-		status, output = commands.getstatusoutput("./stop.sh "+para1)
+		status, output = commands.getstatusoutput(dir+"/stop.sh " +para1  +" " + dir)
 		#upate:download and unzip
 		print(output)
 	elif cmd == "start":
-		status, output = commands.getstatusoutput("./start.sh " +para1 +" " +para2)
+		status, output = commands.getstatusoutput(dir+"/start.sh " +para1 +" " +para2 + " " + dir)
 		#upate:download and unzip
 		print(output)
-	elif cmd == "gfqr":
-		status, output = commands.getstatusoutput("./gfqr.sh " +para1)
+
+        elif cmd == "gfqr":
+                status, output = commands.getstatusoutput(dir+"/gfqr.sh " +para1 + " " + dir)
+                print(output)
+        elif cmd == "qfqr":
+                status, output = commands.getstatusoutput(dir+"/qfqr.sh " +para1 + " " +para2 + " " + dir)
+		print(output)		
+
+	elif cmd == "mysql":
+		status, output = commands.getstatusoutput(dir+"/mysql.sh " +dbhost +" " +dbport +" " +dbname +" "  +para1 + " " +para2 +" " + dir)
 		print(output)
-	elif cmd == "qfqr":
-		status, output = commands.getstatusoutput("./qfqr.sh " +para1)
+		
+	elif cmd == "server_daemon":
+		status, output = commands.getstatusoutput(dir+"/start_dae.sh ")
 		print(output)
+
 
 	#send result to web server
 	
@@ -111,7 +121,7 @@ def process(sid, cmdid, cmd, para1, para2):
 	if llen > 0:
 		output = outputlist[llen - 1]
 	output = urllib.quote(output)
-	url = "http://10.204.190.127/sacallback.jsp?cmdid=%d&ret=%s&sid=%d" % (cmdid, output, sid)
+	url = "http://central.jzsc.7yao.top/Api/Statis/cmd?cmdid=%d&state=%s&sid=%d" % (cmdid, output, sid)
 	print(url)
 	f = urllib.urlopen(url)
 	s = f.read()
@@ -123,19 +133,20 @@ def process(sid, cmdid, cmd, para1, para2):
 	f.close()
 
 if __name__ == '__main__':
-	dir = os.path.split(os.path.realpath(__file__))[0]
+	dir = os.path.dirname(__file__)
+	print dir
 	startSrv()
 	print "========================="
 	print("startSrv success!")
 	print "========================="
 	
-	os.chdir(dir)
+	os.chdir(os.path.realpath(dir))
 	
 	# load config
 	dbhost, dbport, dbname,serverindex = loadConfig()
 
 	#connect to mysql
-	conn = MySQLdb.Connect(host=dbhost, user='root', passwd="hoolai12", port=string.atoi(dbport), db=dbname)
+	conn = MySQLdb.Connect(host=dbhost, user='root', passwd="0987abc123", port=string.atoi(dbport), db=dbname)
 	print("connect to mysql succ!")
 
 	cur = conn.cursor()
@@ -146,10 +157,10 @@ if __name__ == '__main__':
 			row = cur.fetchone()
 			id = row[0]
 			sid = row[1]
-			process(sid, row[2], row[3], row[4], row[5])
+			process(sid, row[2], row[3], row[4], row[5],dir)
 						
 			#after process cmd, should delete from db
-			n = cur.execute("delete from servercmd where id=%d" % id)
+			n = cur.execute("delete from servercmd where id=%d and serverid=%s" % (id,serverindex))
 			if n <= 0:
 				exit(-1)	#delete error,exit system
 
