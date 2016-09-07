@@ -87,7 +87,8 @@ def process(fd, msg):
 			sendAll(msg)
 		else:
 			sendData(sid, msg)
-
+		sendDataToFD(fd, "send ok")
+		
 	elif cmd == "ret":
 		#ret#sid#adminname#msgno#****
 		if (len(cmdlist) < 5):
@@ -162,7 +163,7 @@ if __name__ == '__main__':
 					print socket.getpeername() , " queue empty"
 					epoll.modify(fd, select.EPOLLIN)
 				else :
-					print "send data" , msg , "client:" , socket.getpeername()
+					print "send data:" , msg 
 					socket.send(msg)
 			
 	epoll.unregister(serversocket.fileno())
