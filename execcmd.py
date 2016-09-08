@@ -169,13 +169,13 @@ def cmdrun():
 if __name__ == '__main__':
 	dir = os.path.dirname(__file__)
 	print dir
-	# startSrv()
+	startSrv()
 	print "========================="
 	print("startSrv success!")
 	print "========================="
 	
-	# thread.start_new_thread(cmdrun, ())
-	cmdrun()
+	thread.start_new_thread(cmdrun, ())
+	# cmdrun()
 
 	os.chdir(os.path.realpath(dir))
 	
