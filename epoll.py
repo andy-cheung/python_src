@@ -119,7 +119,7 @@ def process(fd, msg):
 
 if __name__ == '__main__':
 	
-	# startSrv()
+	startSrv()
 
 	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
