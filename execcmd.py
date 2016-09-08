@@ -1,10 +1,15 @@
-import MySQLdb
+#!/usr/bin/python
+# import MySQLdb
 import string
 import os, re
 import sys
 import time
 import urllib
 import commands
+import thread
+import socket
+
+serverindex = 0
 
 def startSrv():
 	print("startSrv....")
@@ -132,6 +137,34 @@ def process(sid, cmdid, cmd, para1, para2, dir):
 	print("web result:", s)
 	f.close()
 
+def cmdrun():
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+	sock.connect(('192.168.201.166', 8081))  
+	sock.send("reg#%s" % str(serverindex))
+	while True:
+		try:
+			cmd = sock.recv(1024) 
+			print(cmd)
+			#cmd#all[sid]#adminname#msgno#****
+			cmdlist = cmd.split("#")
+			if len(cmdlist) < 5:
+				print("cmd error")
+				continue
+			sid = cmdlist[1]
+			if sid != "all" and sid != str(serverindex):
+				print("sid error %s" % sid)
+				continue
+			adminname = cmdlist[2]
+			msgno = cmdlist[3]
+			realcmd = cmdlist[4]
+			status, output = commands.getstatusoutput(realcmd)
+			#ret#sid#adminname#msgno#****
+			ret = "ret#%s#%s#%s#%s" % (str(serverindex), adminname, msgno, output)
+			socket.send(ret)
+		except socket.error:
+			print("socket closed")
+			exit(0)
+
 if __name__ == '__main__':
 	dir = os.path.dirname(__file__)
 	print dir
@@ -140,8 +173,12 @@ if __name__ == '__main__':
 	print("startSrv success!")
 	print "========================="
 	
+	# thread.start_new_thread(cmdrun, ())
+	cmdrun()
+
 	os.chdir(os.path.realpath(dir))
 	
+
 	# load config
 	dbhost, dbport, dbname,serverindex = loadConfig()
 

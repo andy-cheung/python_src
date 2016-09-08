@@ -35,8 +35,8 @@ def startSrv():
 
 def clear(fd):
 	print("socket closed:%d" % fd)
-	name = adminlist.pop(fd)
-	if name:
+	if adminlist.get(fd):
+		name = adminlist.pop(fd)
 		print("%s exit" % name)
 	for k,v in sidlist.items():
 		if v == fd:
