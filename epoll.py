@@ -45,18 +45,15 @@ def sendDataToFD(fd, msg):
 	epoll.modify(fd, select.EPOLLOUT)
 
 def sendData(sid, msg):
-	fd = sidlist[sid]
-	sendDataToFD(fd)
+	if not sidlist.get(sid):
+		print("sid error %s" % sid)
+	sendDataToFD(fd, msg)
 
 def sendAll(msg):
 	for i in sidlist:
 		sendData(i, msg)
 
 def process(fd, msg):
-	if msg == "exit" or msg == "quit":
-		if adminlist[fd]:
-			exit(0)
-
 	cmdlist = msg.split("#")
 	if len(cmdlist) < 0:
 		return
