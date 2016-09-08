@@ -34,19 +34,30 @@ def startSrv():
 	sys.stderr.flush()
 
 def clear(fd):
-	adminlist.pop(fd)
+	print("socket closed:%d" % fd)
+	name = adminlist.pop(fd)
+	if name:
+		print("%s exit" % name)
 	for k,v in sidlist.items():
 		if v == fd:
-			sidlist.pop(k)	
+			sid = sidlist.pop(k)	
+			print("server %s exit" % sid)
 
 def sendDataToFD(fd, msg): 
-	message_queues[fd].put(msg)
+	if not fd:
+		return	
+	ql = message_queues.get(fd)
+	if not ql:
+		return
+	ql.put(msg)
 	#修改读取到消息的连接到等待写事件集合
 	epoll.modify(fd, select.EPOLLOUT)
 
 def sendData(sid, msg):
-	if not sidlist.get(sid):
+	fd = sidlist.get(sid)
+	if not fd: 
 		print("sid error %s" % sid)
+		return
 	sendDataToFD(fd, msg)
 
 def sendAll(msg):
@@ -114,7 +125,6 @@ if __name__ == '__main__':
 	
 	fd_to_socket = {serversocket.fileno():serversocket,}
 	while True:
-		print("waiting for new connection.....")
 		timeout = 10
 		#轮询注册的事件集合
 		events = epoll.poll(timeout)
@@ -157,7 +167,6 @@ if __name__ == '__main__':
 				try:
 					msg = message_queues[fd].get_nowait()
 				except Queue.Empty:
-					print socket.getpeername() , " queue empty"
 					epoll.modify(fd, select.EPOLLIN)
 				else :
 					print "send data:" , msg 
