@@ -141,6 +141,7 @@ def cmdrun():
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 	sock.connect(('192.168.201.166', 8081))  
 	sock.send("reg#%s" % str(serverindex))
+	print(sock.recv(1024))
 	while True:
 		try:
 			cmd = sock.recv(1024) 
@@ -160,7 +161,7 @@ def cmdrun():
 			status, output = commands.getstatusoutput(realcmd)
 			#ret#sid#adminname#msgno#****
 			ret = "ret#%s#%s#%s#%s" % (str(serverindex), adminname, msgno, output)
-			socket.send(ret)
+			sock.send(ret)
 		except socket.error:
 			print("socket closed")
 			exit(0)
@@ -168,7 +169,7 @@ def cmdrun():
 if __name__ == '__main__':
 	dir = os.path.dirname(__file__)
 	print dir
-	startSrv()
+	# startSrv()
 	print "========================="
 	print("startSrv success!")
 	print "========================="

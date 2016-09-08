@@ -64,7 +64,24 @@ def sendAll(msg):
 	for i in sidlist:
 		sendData(i, msg)
 
+def regclient(regname):
+	if regname.find("admin") >= 0:
+		for k,v in adminlist.items():
+			if v == regname:
+				clear(k)
+		adminlist[fd] = regname
+	elif regname.isalnum():
+		if sidlist.get(regname):
+			clear(sidlist[regname])
+		#sid
+		sidlist[regname] = fd
+	print("%s reg!%d" % (regname, fd))
+	sendDataToFD(fd, "ok")
+
 def process(fd, msg):
+	if msg == "heart":
+		return
+
 	cmdlist = msg.split("#")
 	if len(cmdlist) < 0:
 		return
@@ -78,13 +95,7 @@ def process(fd, msg):
 		if len(cmdlist) < 2:
 			return
 		regname = cmdlist[1]
-		if regname.find("admin") >= 0:
-			adminlist[fd] = regname
-		elif regname.isalnum():
-			#sid
-			sidlist[regname] = fd
-		print("%s reg!%d" % (regname, fd))
-		sendDataToFD(fd, "ok")
+		regclient(regname)
 
 	elif cmd == "cmd":
 		#cmd#all[sid]#adminname#msgno#****
@@ -108,7 +119,7 @@ def process(fd, msg):
 
 if __name__ == '__main__':
 	
-	startSrv()
+	# startSrv()
 
 	serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -169,8 +180,9 @@ if __name__ == '__main__':
 				except Queue.Empty:
 					epoll.modify(fd, select.EPOLLIN)
 				else :
-					print "send data:" , msg 
 					socket.send(msg)
+					print "send data:" , msg 
+
 			
 	epoll.unregister(serversocket.fileno())
 	epoll.close()
